@@ -1,0 +1,440 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Luma Dashboard - Cities</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        min-height: 100vh;
+        padding: 20px;
+      }
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+      .header {
+        background: linear-gradient(135deg, #0f3460 0%, #1a1a2e 100%);
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 25px;
+        text-align: center;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      h1 {
+        color: #00d4ff;
+        font-size: 28px;
+      }
+      .subtitle {
+        color: #a0a0a0;
+        font-size: 14px;
+        margin-top: 5px;
+      }
+
+      .menu-tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 25px;
+        justify-content: center;
+      }
+      .tab-btn {
+        background: #0f3460;
+        border: none;
+        padding: 12px 40px;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: 600;
+        color: white;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: inline-block;
+      }
+      .tab-btn.active {
+        background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+        color: #1a1a2e;
+      }
+      .tab-btn:hover:not(.active) {
+        background: #1a4a7a;
+      }
+
+      .stats-grid {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 25px;
+        flex-wrap: wrap;
+      }
+      .stat-card {
+        background: #0f3460;
+        border-radius: 10px;
+        padding: 20px 30px;
+        text-align: center;
+        min-width: 150px;
+      }
+      .stat-value {
+        font-size: 32px;
+        font-weight: bold;
+        color: #00d4ff;
+      }
+      .stat-label {
+        color: #a0a0a0;
+        font-size: 12px;
+        margin-top: 8px;
+      }
+
+      .table-container {
+        background: #0f3460;
+        border-radius: 15px;
+        padding: 20px;
+        overflow-x: auto;
+      }
+      .table-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th {
+        text-align: left;
+        padding: 14px 12px;
+        background: rgba(0, 212, 255, 0.1);
+        color: #00d4ff;
+        font-weight: 600;
+        font-size: 14px;
+      }
+      td {
+        padding: 12px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        color: #e0e0e0;
+        font-size: 13px;
+        vertical-align: middle;
+      }
+      .badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: bold;
+      }
+      .badge.active {
+        background: rgba(0, 255, 0, 0.2);
+        color: #00ff00;
+      }
+      .badge.inactive {
+        background: rgba(255, 0, 0, 0.2);
+        color: #ff4444;
+      }
+
+      button {
+        background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        transition: transform 0.2s;
+      }
+      button:hover {
+        transform: translateY(-2px);
+      }
+      button.danger {
+        background: linear-gradient(135deg, #ff4757 0%, #cc0033 100%);
+      }
+      button.warning {
+        background: linear-gradient(135deg, #ffa502 0%, #cc7b00 100%);
+      }
+      button.small {
+        padding: 6px 12px;
+        font-size: 12px;
+      }
+
+      .toast {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        padding: 12px 24px;
+        border-radius: 8px;
+        z-index: 9999;
+        animation: slideIn 0.3s ease;
+        font-size: 14px;
+        font-weight: 500;
+      }
+      @keyframes slideIn {
+        from {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+
+      .refresh-info {
+        text-align: right;
+        font-size: 11px;
+        color: #6c8db0;
+        margin-top: 15px;
+        padding-top: 10px;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+      }
+
+      .select-all-container {
+        margin-bottom: 15px;
+        padding: 10px;
+        background: rgba(0, 212, 255, 0.1);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .checkbox-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .checkbox-group input {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+      }
+      .checkbox-group label {
+        color: #00d4ff;
+        font-weight: 600;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>🏙️ Luma Dashboard - Cities</h1>
+        <p class="subtitle">Manage Cities</p>
+      </div>
+
+      <div class="menu-tabs">
+        <a href="/token.html" class="tab-btn">🔑 Tokens</a>
+        <a href="/cities.html" class="tab-btn active">🏙️ Cities</a>
+      </div>
+
+      <div id="citiesSection">
+        <div class="stats-grid" id="cityStats"></div>
+        <div class="table-container">
+          <div class="table-header">
+            <h3 class="section-title" style="margin-bottom: 0">🏙️ City List</h3>
+            <button onclick="loadCities()" class="small">🔄 Refresh</button>
+          </div>
+          <div id="citiesTable">Loading...</div>
+          <div class="refresh-info" id="cityLastUpdate"></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      async function loadCityStats() {
+        try {
+          const res = await fetch("/api/cities");
+          const result = await res.json();
+          if (result.success) {
+            let active = 0,
+              inactive = 0;
+            for (let i = 0; i < result.data.length; i++) {
+              if (
+                result.data[i].is_active === 1 ||
+                result.data[i].is_active === true
+              )
+                active++;
+              else inactive++;
+            }
+            document.getElementById("cityStats").innerHTML =
+              '<div class="stat-card"><div class="stat-value">' +
+              result.data.length +
+              '</div><div class="stat-label">Total Cities</div></div><div class="stat-card"><div class="stat-value">' +
+              active +
+              '</div><div class="stat-label">Active Cities</div></div><div class="stat-card"><div class="stat-value">' +
+              inactive +
+              '</div><div class="stat-label">Inactive Cities</div></div>';
+          }
+        } catch (err) {
+          console.error(err);
+        }
+      }
+
+      async function loadCities() {
+        try {
+          const res = await fetch("/api/cities");
+          const result = await res.json();
+          if (result.success) {
+            renderCityTable(result.data);
+            document.getElementById("cityLastUpdate").innerHTML =
+              "Last updated: " + new Date().toLocaleString();
+          }
+        } catch (err) {
+          document.getElementById("citiesTable").innerHTML =
+            '<div style="text-align:center;padding:40px;">Error loading cities</div>';
+        }
+      }
+
+      function renderCityTable(cities) {
+        if (!cities || cities.length === 0) {
+          document.getElementById("citiesTable").innerHTML =
+            '<div style="text-align:center;padding:40px;">No cities found</div>';
+          return;
+        }
+
+        let allActive = true;
+        for (let i = 0; i < cities.length; i++) {
+          if (!(cities[i].is_active === 1 || cities[i].is_active === true)) {
+            allActive = false;
+            break;
+          }
+        }
+
+        let html =
+          '<div class="select-all-container"><div class="checkbox-group"><input type="checkbox" id="selectAllCities" onchange="toggleAllCities(this.checked)" ' +
+          (allActive ? "checked" : "") +
+          '><label for="selectAllCities">✓ Select All Cities (Enable/Disable All)</label></div></div>';
+        html +=
+          '<div class="select-all-container" style="margin-top:5px;"><div class="checkbox-group"><input type="checkbox" id="americanCheck" onchange="toggleAmericanCities(this.checked)"><label for="americanCheck">🌎 American Check (30 Cities - North + South America)</label></div></div>';
+        html +=
+          "<table><thead><tr><th>City Slug</th><th>Status</th><th>Actions</th></tr></thead><tbody>";
+
+        for (let i = 0; i < cities.length; i++) {
+          const c = cities[i];
+          const isActive = c.is_active === 1 || c.is_active === true;
+          const safeSlug = c.city_slug.replace(/'/g, "\\'");
+          html += "<tr>";
+          html +=
+            '<td style="padding:12px;"><strong>' +
+            c.city_slug +
+            "</strong></td>";
+          html +=
+            '<td style="padding:12px;"><span class="badge ' +
+            (isActive ? "active" : "inactive") +
+            '">' +
+            (isActive ? "ACTIVE" : "INACTIVE") +
+            "</span></td>";
+          html +=
+            '<td style="padding:12px;"><button class="small" onclick="toggleCity(\'' +
+            safeSlug +
+            "', " +
+            !isActive +
+            ')">' +
+            (isActive ? "Disable" : "Enable") +
+            "</button></td>";
+          html += "</tr>";
+        }
+
+        html += "</tbody></table>";
+        document.getElementById("citiesTable").innerHTML = html;
+      }
+
+      async function toggleCity(slug, newStatus) {
+        showToast("Updating...", "info");
+        try {
+          const res = await fetch("/api/cities/" + slug + "/toggle", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ is_active: newStatus }),
+          });
+          const result = await res.json();
+          if (result.success) {
+            showToast(
+              "City " + (newStatus ? "enabled" : "disabled"),
+              "success",
+            );
+            loadCities();
+            loadCityStats();
+          } else {
+            showToast(result.error, "error");
+          }
+        } catch (err) {
+          showToast("Error updating city", "error");
+        }
+      }
+
+      async function toggleAllCities(newStatus) {
+        showToast(
+          (newStatus ? "Enabling" : "Disabling") + " all cities...",
+          "info",
+        );
+        try {
+          const res = await fetch("/api/cities/toggle-all", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ is_active: newStatus }),
+          });
+          const result = await res.json();
+          if (result.success) {
+            showToast(
+              "All cities " + (newStatus ? "enabled" : "disabled"),
+              "success",
+            );
+            loadCities();
+            loadCityStats();
+          } else {
+            showToast(result.error, "error");
+          }
+        } catch (err) {
+          showToast("Error updating cities", "error");
+        }
+      }
+
+      async function toggleAmericanCities(newStatus) {
+        showToast(
+          (newStatus ? "Enabling" : "Disabling") + " American cities...",
+          "info",
+        );
+        try {
+          const res = await fetch("/api/cities/toggle-american", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ is_active: newStatus }),
+          });
+          const result = await res.json();
+          if (result.success) {
+            showToast(result.message, "success");
+            loadCities();
+            loadCityStats();
+          } else {
+            showToast(result.error, "error");
+          }
+        } catch (err) {
+          showToast("Error: " + err.message, "error");
+        }
+      }
+
+      function showToast(msg, type) {
+        const toast = document.createElement("div");
+        toast.className = "toast";
+        toast.textContent = msg;
+        toast.style.background =
+          type === "success"
+            ? "#28a745"
+            : type === "error"
+              ? "#dc3545"
+              : "#ffc107";
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+      }
+
+      loadCities();
+      loadCityStats();
+    </script>
+  </body>
+</html>
