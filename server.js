@@ -227,11 +227,48 @@ app.post('/api/cities/toggle-american', async (req, res) => {
   }
 });
 
+// ADD NEW CITY
+app.post('/api/cities', async (req, res) => {
+  try {
+    const { city_slug } = req.body;
+    if (!city_slug) return res.status(400).json({ success: false, error: 'City slug required' });
+
+    const pool = await sql.connect(DB_CONFIG);
+
+    // Check if city already exists
+    const check = await pool.request()
+      .input('city_slug', sql.NVarChar, city_slug)
+      .query('SELECT * FROM luma_city WHERE city_slug = @city_slug');
+
+    if (check.recordset.length > 0) {
+      await pool.close();
+      return res.status(400).json({ success: false, error: 'City already exists' });
+    }
+
+    // Insert new city (default inactive)
+    await pool.request()
+      .input('city_slug', sql.NVarChar, city_slug)
+      .input('is_active', sql.Bit, 0)
+      .query('INSERT INTO luma_city (city_slug, is_active) VALUES (@city_slug, @is_active)');
+
+    await pool.close();
+    res.json({ success: true, message: 'City added successfully' });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+
+
 // ============ SERVE HTML FILES ============
 
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'token.html'));
 });
+
+
+
+
 
 app.get('/token.html', (req, res) => {
   res.sendFile(path.join(__dirname, 'token.html'));
@@ -240,6 +277,10 @@ app.get('/token.html', (req, res) => {
 app.get('/cities.html', (req, res) => {
   res.sendFile(path.join(__dirname, 'cities.html'));
 });
+
+
+
+
 
 // ============ START SERVER ============
 
